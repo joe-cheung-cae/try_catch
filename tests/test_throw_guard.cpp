@@ -4,7 +4,9 @@
 
 static int may_throw(int x) {
 #if TC_EXCEPTIONS_ENABLED
-    if (x < 0) TC_THROW(std::runtime_error("neg"));
+    if (x < 0) {
+        TC_THROW(std::runtime_error("neg"));
+    }
     return x;
 #else
     // No exceptions: no throw

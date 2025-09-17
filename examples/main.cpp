@@ -9,7 +9,9 @@ static int may_throw(int x) {
     }
 #else
     // In no-exception builds, signal failure via return code
-    if (x < 0) return -1;
+    if (x < 0) {
+        return -1;
+    }
 #endif
     return x * 2;
 }
@@ -37,10 +39,12 @@ int main() {
         std::cout << "ok: " << a << "\n";
         int b = may_throw(-1);
         std::cout << "should not reach: " << b << "\n";
-    } TC_CATCH(const std::exception&, ex) {
+    }
+    TC_CATCH(const std::exception&, ex) {
         TC_ERROR("caught std::exception in example");
         rc = 1;
-    } TC_CATCH_ALL() {
+    }
+    TC_CATCH_ALL() {
         TC_WARN("caught unknown exception in example");
         rc = 2;
     }

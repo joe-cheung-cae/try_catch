@@ -2,7 +2,9 @@
 #include "../include/tc/try_catch.hpp"
 
 struct X {
-    int f() TC_NOEXCEPT_IF_NOEXCEPTIONS { return 42; }
+    int f() TC_NOEXCEPT_IF_NOEXCEPTIONS {
+        return 42;
+    }
 };
 
 TEST(Noexcept, ConditionalNoexcept) {
