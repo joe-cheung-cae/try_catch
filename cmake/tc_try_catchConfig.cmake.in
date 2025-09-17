@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Interface target is exported via the targets file
+include(${CMAKE_CURRENT_LIST_DIR}/tc_try_catchTargets.cmake)

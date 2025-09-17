@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(TryCatchMacros LANGUAGES CXX)
+project(TryCatchMacros VERSION 0.1.0 LANGUAGES CXX)
 
 option(TC_FORCE_NO_EXCEPTIONS "Force-build example with exceptions disabled (GCC/Clang)" OFF)
 
@@ -8,7 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(tc_try_catch INTERFACE)
-target_include_directories(tc_try_catch INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(tc_try_catch INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+add_library(tc::try_catch ALIAS tc_try_catch)
 
 add_executable(example examples/main.cpp)
 target_link_libraries(example PRIVATE tc_try_catch)
@@ -69,3 +73,38 @@ if (BUILD_TESTING)
   endif()
   add_test(NAME tc_tests_noex COMMAND tc_tests_noex)
 endif()
+
+# ---------- Install & package config (header-only interface) ----------
+include(CMakePackageConfigHelpers)
+
+set(TC_TARG_EXPORT_NAME tc_try_catchTargets)
+set(TC_INSTALL_CONFIGDIR lib/cmake/tc_try_catch)
+
+install(TARGETS tc_try_catch
+    EXPORT ${TC_TARG_EXPORT_NAME})
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    DESTINATION include)
+
+install(EXPORT ${TC_TARG_EXPORT_NAME}
+    NAMESPACE tc::
+    FILE tc_try_catchTargets.cmake
+    DESTINATION ${TC_INSTALL_CONFIGDIR})
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tc_try_catchConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/tc_try_catchConfig.cmake
+  INSTALL_DESTINATION ${TC_INSTALL_CONFIGDIR}
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/tc_try_catchConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/tc_try_catchConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/tc_try_catchConfigVersion.cmake
+  DESTINATION ${TC_INSTALL_CONFIGDIR}
+)

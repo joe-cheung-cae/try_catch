@@ -1,5 +1,8 @@
 # Try/Catch Macro Layer
 
+![CI](https://github.com/joe-cheung-cae/try_catch/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
 Header-only macros to manage C++ try/catch across platforms, build types, and exception settings.
 
 ## Why
@@ -23,6 +26,29 @@ cmake --build build -v
 cmake -S . -B build-noex -DTC_FORCE_NO_EXCEPTIONS=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build-noex -v
 ./build-noex/example
+```
+
+Install and use from another project:
+
+```
+# from this repo root
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target install
+```
+
+Then in a consumer project:
+
+```
+find_package(tc_try_catch CONFIG REQUIRED)
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE tc::try_catch)
+```
+
+Or as a submodule/subdirectory:
+
+```
+add_subdirectory(try_catch)
+target_link_libraries(app PRIVATE tc::try_catch)
 ```
 
 ## Macros

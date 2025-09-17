@@ -38,3 +38,17 @@ jobs:
         run: |
           cmake --build build --target tc_tests_noex --config Debug --parallel 2
           ctest --test-dir build -C Debug -R tc_tests_noex --output-on-failure
+
+      - name: Lint (clang-format)
+        if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-format
+          git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format -i --dry-run --Werror
+
+      - name: Analyze (clang-tidy)
+        if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-tidy
+          cmake -S . -B build-tidy -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build-tidy --parallel 2
+          run-clang-tidy -p build-tidy || true
