@@ -1,0 +1,17 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Treat these as text with C/C++ diff/merge
+*.h diff=cpp
+*.hpp diff=cpp
+*.c diff=cpp
+*.cc diff=cpp
+*.cpp diff=cpp
+*.ipp diff=cpp
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary

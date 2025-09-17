@@ -1,0 +1,41 @@
+# Build directories
+/build/
+/build-*/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake-build-*/
+/Testing/
+
+# Binaries and libs
+/*.exe
+/*.out
+/*.a
+/*.lib
+/*.dll
+/*.so
+/*.dylib
+
+# CMake artifacts
+/Makefile
+/*.cmake
+/**/*.cmake
+/compile_commands.json
+/install_manifest.txt
+
+# IDE/editor
+/.idea/
+/.vscode/
+*.code-workspace
+
+# OS and misc
+.DS_Store
+Thumbs.db
+
+# Generated deps (e.g., FetchContent)
+/_deps/
+
+# Logs
+*.log
+
+# Cache
+/.cache/
