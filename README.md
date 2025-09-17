@@ -79,3 +79,18 @@ See `examples/main.cpp`.
 
 - MSVC: exceptions are controlled by `/EHsc`. This sample doesn't force-disable exceptions on MSVC.
 - GCC/Clang: use `-fno-exceptions` to disable. CMake option `TC_FORCE_NO_EXCEPTIONS` applies only to the example target.
+
+## Pre-commit formatting (optional)
+
+This repo ships a Git pre-commit hook to auto-run `clang-format` on staged C/C++ files using the repo's `.clang-format`.
+
+Enable it locally:
+
+```
+git config core.hooksPath .githooks
+```
+
+Requirements:
+- `clang-format` available in your PATH.
+
+The hook formats staged `*.{c,cc,cpp,cxx,h,hh,hpp,hxx}` files and re-stages them before commit.

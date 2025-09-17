@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Pre-commit hook: format staged C/C++ files with clang-format using repo .clang-format
+# Fails if clang-format is not available.
+set -euo pipefail
+
+# Only run in a git repo
+if ! command -v git >/dev/null 2>&1; then
+  echo "pre-commit: git not found" >&2
+  exit 0
+fi
+
+if ! command -v clang-format >/dev/null 2>&1; then
+  echo "pre-commit: clang-format not found; skipping formatting" >&2
+  exit 0
+fi
+
+# Get list of staged files (Added, Copied, Modified, Renamed)
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR | \
+  grep -E '\\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$' || true)
+
+if [ -z "$staged_files" ]; then
+  exit 0
+fi
+
+# Format and re-add any changed files
+fail=0
+for f in $staged_files; do
+  if [ -f "$f" ]; then
+    clang-format -i "$f" || fail=1
+    git add "$f" || true
+  fi
+done
+
+if [ "$fail" -ne 0 ]; then
+  echo "pre-commit: clang-format failed on some files" >&2
+  exit 1
+fi
+
+exit 0
