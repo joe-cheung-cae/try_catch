@@ -26,20 +26,15 @@ jobs:
         shell: bash
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-          if [ "${{ matrix.exceptions }}" = "off" ]; then
-            # Create a second build disabling exceptions for test target
-            cmake -S . -B build-noex -DCMAKE_BUILD_TYPE=Debug
-          fi
 
       - name: Build (exceptions on)
-        run: cmake --build build --config Debug -- -j2
+        run: cmake --build build --config Debug --parallel 2
 
       - name: Test (exceptions on)
         run: ctest --test-dir build --output-on-failure -C Debug
 
       - name: Build/Test (exceptions off)
         if: matrix.exceptions == 'off'
-        shell: bash
         run: |
-          cmake --build build --target tc_tests_noex --config Debug -- -j2
-          ./build/tc_tests_noex || (echo "tc_tests_noex failed"; exit 1)
+          cmake --build build --target tc_tests_noex --config Debug --parallel 2
+          ctest --test-dir build -C Debug -R tc_tests_noex --output-on-failure
