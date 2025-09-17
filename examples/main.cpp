@@ -1,6 +1,6 @@
+#include "../include/tc/try_catch.hpp"
 #include <iostream>
 #include <stdexcept>
-#include "../include/tc/try_catch.hpp"
 
 static int may_throw(int x) {
 #if TC_EXCEPTIONS_ENABLED
@@ -17,8 +17,8 @@ static int may_throw(int x) {
 }
 
 int main() {
-    std::cout << "TC_EXCEPTIONS_ENABLED=" << TC_EXCEPTIONS_ENABLED
-              << ", TC_DEBUG=" << TC_DEBUG << ", TC_RELEASE=" << TC_RELEASE << "\n";
+    std::cout << "TC_EXCEPTIONS_ENABLED=" << TC_EXCEPTIONS_ENABLED << ", TC_DEBUG=" << TC_DEBUG
+              << ", TC_RELEASE=" << TC_RELEASE << "\n";
 
     // Log at various levels
     TC_LOG_TRACE("trace message");

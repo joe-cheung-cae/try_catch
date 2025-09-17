@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstdarg>
-#include <exception>
 #include <atomic>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <exception>
 
 // ===================== Build-type detection =====================
 #if !defined(TC_DEBUG) && !defined(TC_RELEASE)
@@ -74,8 +74,7 @@ namespace tc {
 namespace detail {
 
 inline void default_abort_noexcept(const char* file, int line, const char* func, const char* msg) {
-    std::fprintf(stderr,
-                 "[tc] fatal: exception thrown but exceptions are disabled\n  at %s:%d in %s\n  msg: %s\n",
+    std::fprintf(stderr, "[tc] fatal: exception thrown but exceptions are disabled\n  at %s:%d in %s\n  msg: %s\n",
                  file ? file : "(unknown)", line, func ? func : "(unknown)", msg ? msg : "(none)");
     std::fflush(stderr);
     std::abort();
@@ -85,37 +84,36 @@ enum class log_level : int { trace = 0, debug = 1, info = 2, warn = 3, error = 4
 
 using log_sink_t = void (*)(log_level, const char* file, int line, const char* func, const char* fmt, va_list ap);
 
-inline void default_stderr_sink(
-    log_level lvl, const char* file, int line, const char* func, const char* fmt, va_list ap) {
+inline void default_stderr_sink(log_level lvl, const char* file, int line, const char* func, const char* fmt,
+                                va_list ap) {
     const char* name = "LOG";
     switch (lvl) {
-        case log_level::trace:
-            name = "TRACE";
-            break;
-        case log_level::debug:
-            name = "DEBUG";
-            break;
-        case log_level::info:
-            name = "INFO";
-            break;
-        case log_level::warn:
-            name = "WARN";
-            break;
-        case log_level::error:
-            name = "ERROR";
-            break;
-        case log_level::off:
-            name = "OFF";
-            break;
+    case log_level::trace:
+        name = "TRACE";
+        break;
+    case log_level::debug:
+        name = "DEBUG";
+        break;
+    case log_level::info:
+        name = "INFO";
+        break;
+    case log_level::warn:
+        name = "WARN";
+        break;
+    case log_level::error:
+        name = "ERROR";
+        break;
+    case log_level::off:
+        name = "OFF";
+        break;
     }
-    std::fprintf(
-        stderr, "[%s] %s:%d %s: ", name, file ? file : "(unknown)", line, func ? func : "(unknown)");
+    std::fprintf(stderr, "[%s] %s:%d %s: ", name, file ? file : "(unknown)", line, func ? func : "(unknown)");
     std::vfprintf(stderr, fmt ? fmt : "(null)", ap);
     std::fputc('\n', stderr);
 }
 
 inline std::atomic<int>& runtime_log_level() {
-    static std::atomic<int> lvl{
+    static std::atomic<int> lvl {
 #if TC_DEBUG
         static_cast<int>(log_level::debug)
 #else
@@ -146,11 +144,12 @@ inline log_sink_t get_log_sink() {
     return runtime_sink().load(std::memory_order_relaxed);
 }
 
-inline void vlog_dispatch(
-    log_level lvl, const char* file, int line, const char* func, const char* fmt, va_list ap) {
-    if (static_cast<int>(lvl) < runtime_log_level().load(std::memory_order_relaxed)) return;
+inline void vlog_dispatch(log_level lvl, const char* file, int line, const char* func, const char* fmt, va_list ap) {
+    if (static_cast<int>(lvl) < runtime_log_level().load(std::memory_order_relaxed))
+        return;
     auto* s = runtime_sink().load(std::memory_order_relaxed);
-    if (s) s(lvl, file, line, func, fmt, ap);
+    if (s)
+        s(lvl, file, line, func, fmt, ap);
 }
 
 inline void logf(log_level lvl, const char* file, int line, const char* func, const char* fmt, ...) {
@@ -185,7 +184,7 @@ inline void logf(log_level lvl, const char* file, int line, const char* func, co
 #endif
 
 #if TC_EXCEPTIONS_ENABLED
-#define TC_THROW(ex) throw (ex)
+#define TC_THROW(ex) throw(ex)
 #define TC_RETHROW() throw
 #else
 // When exceptions are disabled, throwing is a fatal error by default.
@@ -260,49 +259,49 @@ inline sink_t get_sink() {
 // ===================== Convenience wrap macros (optional) =====================
 // TC_GUARD(expr): Run expr inside TC_TRY and convert any exception to a boolean failure.
 // Returns true if ran without exception; false if caught. In no-exception builds it's always true.
-#define TC_GUARD(expr)                                                                                                   \
-    ([&]() TC_NOEXCEPT_IF_NOEXCEPTIONS -> bool {                                                                         \
-        bool ok = true;                                                                                                   \
-        TC_TRY {                                                                                                          \
-            (void)(expr);                                                                                                 \
-        }                                                                                                                 \
-        TC_CATCH(const std::exception&, _tc_unused) {                                                                     \
-            ok = false;                                                                                                   \
-        }                                                                                                                 \
-        TC_CATCH_ALL() {                                                                                                  \
-            ok = false;                                                                                                   \
-        }                                                                                                                 \
-        return ok;                                                                                                        \
+#define TC_GUARD(expr)                                                                                                 \
+    ([&]() TC_NOEXCEPT_IF_NOEXCEPTIONS -> bool {                                                                       \
+        bool ok = true;                                                                                                \
+        TC_TRY {                                                                                                       \
+            (void)(expr);                                                                                              \
+        }                                                                                                              \
+        TC_CATCH(const std::exception&, _tc_unused) {                                                                  \
+            ok = false;                                                                                                \
+        }                                                                                                              \
+        TC_CATCH_ALL() {                                                                                               \
+            ok = false;                                                                                                \
+        }                                                                                                              \
+        return ok;                                                                                                     \
     }())
 
 // Ready-made catch helpers to pair with try/catch and emit warnings/errors.
 #if TC_EXCEPTIONS_ENABLED
-#define TC_CATCH_STD_WARN()                                                                                               \
-    TC_CATCH(const std::exception&, _tc_e) {                                                                              \
-        TC_WARN("exception: %s", _tc_e.what());                                                                          \
+#define TC_CATCH_STD_WARN()                                                                                            \
+    TC_CATCH(const std::exception&, _tc_e) {                                                                           \
+        TC_WARN("exception: %s", _tc_e.what());                                                                        \
     }
-#define TC_CATCH_STD_ERROR()                                                                                              \
-    TC_CATCH(const std::exception&, _tc_e) {                                                                              \
-        TC_ERROR("exception: %s", _tc_e.what());                                                                         \
+#define TC_CATCH_STD_ERROR()                                                                                           \
+    TC_CATCH(const std::exception&, _tc_e) {                                                                           \
+        TC_ERROR("exception: %s", _tc_e.what());                                                                       \
     }
 #else
-#define TC_CATCH_STD_WARN()                                                                                               \
-    TC_CATCH(const std::exception&, _tc_unused) {                                                                         \
-        TC_WARN("exception handler (no-exceptions build)");                                                              \
+#define TC_CATCH_STD_WARN()                                                                                            \
+    TC_CATCH(const std::exception&, _tc_unused) {                                                                      \
+        TC_WARN("exception handler (no-exceptions build)");                                                            \
     }
-#define TC_CATCH_STD_ERROR()                                                                                              \
-    TC_CATCH(const std::exception&, _tc_unused) {                                                                         \
-        TC_ERROR("exception handler (no-exceptions build)");                                                             \
+#define TC_CATCH_STD_ERROR()                                                                                           \
+    TC_CATCH(const std::exception&, _tc_unused) {                                                                      \
+        TC_ERROR("exception handler (no-exceptions build)");                                                           \
     }
 #endif
 
-#define TC_CATCH_ALL_WARN()                                                                                               \
-    TC_CATCH_ALL() {                                                                                                      \
-        TC_WARN("unknown exception");                                                                                    \
+#define TC_CATCH_ALL_WARN()                                                                                            \
+    TC_CATCH_ALL() {                                                                                                   \
+        TC_WARN("unknown exception");                                                                                  \
     }
-#define TC_CATCH_ALL_ERROR()                                                                                              \
-    TC_CATCH_ALL() {                                                                                                      \
-        TC_ERROR("unknown exception");                                                                                   \
+#define TC_CATCH_ALL_ERROR()                                                                                           \
+    TC_CATCH_ALL() {                                                                                                   \
+        TC_ERROR("unknown exception");                                                                                 \
     }
 
 // Variants that allow custom user body to run inside the catch block.
@@ -313,80 +312,80 @@ inline sink_t get_sink() {
 // Or with a named exception variable:
 //   TC_CATCH_STD_WARN_AS(e, { TC_LOG_INFO("%s", e.what()); })
 #if TC_EXCEPTIONS_ENABLED
-#define TC_CATCH_STD_WARN_DO(BODY)                                                                                        \
-    TC_CATCH(const std::exception&, _tc_e) {                                                                              \
-        TC_WARN("exception: %s", _tc_e.what());                                                                          \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_WARN_DO(BODY)                                                                                     \
+    TC_CATCH(const std::exception&, _tc_e) {                                                                           \
+        TC_WARN("exception: %s", _tc_e.what());                                                                        \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_ERROR_DO(BODY)                                                                                       \
-    TC_CATCH(const std::exception&, _tc_e) {                                                                              \
-        TC_ERROR("exception: %s", _tc_e.what());                                                                         \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_ERROR_DO(BODY)                                                                                    \
+    TC_CATCH(const std::exception&, _tc_e) {                                                                           \
+        TC_ERROR("exception: %s", _tc_e.what());                                                                       \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_WARN_AS(NAME, BODY)                                                                                  \
-    TC_CATCH(const std::exception&, NAME) {                                                                               \
-        TC_WARN("exception: %s", NAME.what());                                                                           \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_WARN_AS(NAME, BODY)                                                                               \
+    TC_CATCH(const std::exception&, NAME) {                                                                            \
+        TC_WARN("exception: %s", NAME.what());                                                                         \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_ERROR_AS(NAME, BODY)                                                                                 \
-    TC_CATCH(const std::exception&, NAME) {                                                                               \
-        TC_ERROR("exception: %s", NAME.what());                                                                          \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_ERROR_AS(NAME, BODY)                                                                              \
+    TC_CATCH(const std::exception&, NAME) {                                                                            \
+        TC_ERROR("exception: %s", NAME.what());                                                                        \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
 #else
-#define TC_CATCH_STD_WARN_DO(BODY)                                                                                        \
-    TC_CATCH(const std::exception&, _tc_unused) {                                                                         \
-        TC_WARN("exception handler (no-exceptions build)");                                                              \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_WARN_DO(BODY)                                                                                     \
+    TC_CATCH(const std::exception&, _tc_unused) {                                                                      \
+        TC_WARN("exception handler (no-exceptions build)");                                                            \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_ERROR_DO(BODY)                                                                                       \
-    TC_CATCH(const std::exception&, _tc_unused) {                                                                         \
-        TC_ERROR("exception handler (no-exceptions build)");                                                             \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_ERROR_DO(BODY)                                                                                    \
+    TC_CATCH(const std::exception&, _tc_unused) {                                                                      \
+        TC_ERROR("exception handler (no-exceptions build)");                                                           \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_WARN_AS(NAME, BODY)                                                                                  \
-    TC_CATCH(const std::exception&, NAME) {                                                                               \
-        const std::exception& NAME = *static_cast<const std::exception*>(nullptr);                                        \
-        TC_WARN("exception handler (no-exceptions build)");                                                              \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_WARN_AS(NAME, BODY)                                                                               \
+    TC_CATCH(const std::exception&, NAME) {                                                                            \
+        const std::exception& NAME = *static_cast<const std::exception*>(nullptr);                                     \
+        TC_WARN("exception handler (no-exceptions build)");                                                            \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_STD_ERROR_AS(NAME, BODY)                                                                                 \
-    TC_CATCH(const std::exception&, NAME) {                                                                               \
-        const std::exception& NAME = *static_cast<const std::exception*>(nullptr);                                        \
-        TC_ERROR("exception handler (no-exceptions build)");                                                             \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_STD_ERROR_AS(NAME, BODY)                                                                              \
+    TC_CATCH(const std::exception&, NAME) {                                                                            \
+        const std::exception& NAME = *static_cast<const std::exception*>(nullptr);                                     \
+        TC_ERROR("exception handler (no-exceptions build)");                                                           \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
 #endif
 
-#define TC_CATCH_ALL_WARN_DO(BODY)                                                                                        \
-    TC_CATCH_ALL() {                                                                                                      \
-        TC_WARN("unknown exception");                                                                                    \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_ALL_WARN_DO(BODY)                                                                                     \
+    TC_CATCH_ALL() {                                                                                                   \
+        TC_WARN("unknown exception");                                                                                  \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
-#define TC_CATCH_ALL_ERROR_DO(BODY)                                                                                       \
-    TC_CATCH_ALL() {                                                                                                      \
-        TC_ERROR("unknown exception");                                                                                   \
-        do {                                                                                                              \
-            BODY;                                                                                                         \
-        } while (0);                                                                                                      \
+#define TC_CATCH_ALL_ERROR_DO(BODY)                                                                                    \
+    TC_CATCH_ALL() {                                                                                                   \
+        TC_ERROR("unknown exception");                                                                                 \
+        do {                                                                                                           \
+            BODY;                                                                                                      \
+        } while (0);                                                                                                   \
     }
 
 // ===================== Versioning =====================

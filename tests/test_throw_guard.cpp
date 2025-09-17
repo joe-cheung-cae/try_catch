@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "../include/tc/try_catch.hpp"
+#include <gtest/gtest.h>
 #include <stdexcept>
 
 static int may_throw(int x) {

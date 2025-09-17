@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "../include/tc/try_catch.hpp"
+#include <gtest/gtest.h>
 
 struct X {
     int f() TC_NOEXCEPT_IF_NOEXCEPTIONS {

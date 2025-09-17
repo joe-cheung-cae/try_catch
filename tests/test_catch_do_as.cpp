@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include "../include/tc/try_catch.hpp"
+#include <gtest/gtest.h>
 #include <stdexcept>
 
 #if TC_EXCEPTIONS_ENABLED
@@ -32,7 +32,10 @@ TEST(CatchDoAsNoEx, CompileAwayButBodyPresent) {
         n = 1;
     }
     TC_CATCH_STD_WARN_DO({ n = 99; })
-    TC_CATCH_STD_WARN_AS(e, { (void)e; m = 2; })
+    TC_CATCH_STD_WARN_AS(e, {
+        (void)e;
+        m = 2;
+    })
     TC_CATCH_ALL_ERROR_DO({ m = 3; })
     EXPECT_EQ(n, 1);
     EXPECT_EQ(m, 0);

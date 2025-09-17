@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
 #include "../include/tc/try_catch.hpp"
+#include <cstdarg>
+#include <gtest/gtest.h>
 #include <string>
 #include <vector>
-#include <cstdarg>
 
 namespace {
 struct MemSink {
@@ -10,8 +10,8 @@ struct MemSink {
         static std::vector<std::string> v;
         return v;
     }
-    static void sink(
-        ::tc::detail::log_level lvl, const char* file, int line, const char* func, const char* fmt, va_list ap) {
+    static void sink(::tc::detail::log_level lvl, const char* file, int line, const char* func, const char* fmt,
+                     va_list ap) {
         (void)file;
         (void)line;
         (void)func;
@@ -19,24 +19,24 @@ struct MemSink {
         vsnprintf(buf, sizeof(buf), fmt, ap);
         std::string level;
         switch (lvl) {
-            case ::tc::detail::log_level::trace:
-                level = "TRACE";
-                break;
-            case ::tc::detail::log_level::debug:
-                level = "DEBUG";
-                break;
-            case ::tc::detail::log_level::info:
-                level = "INFO";
-                break;
-            case ::tc::detail::log_level::warn:
-                level = "WARN";
-                break;
-            case ::tc::detail::log_level::error:
-                level = "ERROR";
-                break;
-            default:
-                level = "?";
-                break;
+        case ::tc::detail::log_level::trace:
+            level = "TRACE";
+            break;
+        case ::tc::detail::log_level::debug:
+            level = "DEBUG";
+            break;
+        case ::tc::detail::log_level::info:
+            level = "INFO";
+            break;
+        case ::tc::detail::log_level::warn:
+            level = "WARN";
+            break;
+        case ::tc::detail::log_level::error:
+            level = "ERROR";
+            break;
+        default:
+            level = "?";
+            break;
         }
         lines().push_back(level + ":" + buf);
     }
