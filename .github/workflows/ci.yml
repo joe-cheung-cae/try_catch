@@ -44,7 +44,9 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y clang-format
           # Show version for reproducibility
-          clang-format --version
+            sudo apt-get update && sudo apt-get install -y clang-format-18
+            sudo ln -sf /usr/bin/clang-format-18 /usr/local/bin/clang-format
+            clang-format --version || true
           # Run in check mode; do not modify files (-i removed). Use style from repo file explicitly.
           git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format --style=file --dry-run --Werror
           # (Optional) If future auto-fix desired, uncomment below to detect diff after formatting copy.

@@ -113,13 +113,14 @@ inline void default_stderr_sink(log_level lvl, const char* file, int line, const
 }
 
 inline std::atomic<int>& runtime_log_level() {
-    static std::atomic<int> lvl {
+    auto initial = []() constexpr -> int {
 #if TC_DEBUG
-        static_cast<int>(log_level::debug)
+    return static_cast<int>(log_level::debug);
 #else
-        static_cast<int>(log_level::info)
+    return static_cast<int>(log_level::info);
 #endif
-    };
+    }();
+    static std::atomic<int> lvl{initial};
     return lvl;
 }
 
