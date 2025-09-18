@@ -5,6 +5,13 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      run_format:
+        description: "Run optional clang-format check job"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build-test:
@@ -47,3 +54,20 @@ jobs:
           cmake -S . -B build-tidy -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           cmake --build build-tidy --parallel 2
           run-clang-tidy -p build-tidy || true
+
+  format-check:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_format == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-format-18 || sudo apt-get install -y clang-format
+          sudo ln -sf /usr/bin/clang-format-18 /usr/local/bin/clang-format || true
+          clang-format --version
+      - name: Run clang-format diff check
+        run: |
+          git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format --style=file --dry-run --Werror
