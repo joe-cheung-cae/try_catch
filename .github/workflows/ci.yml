@@ -43,7 +43,15 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
         run: |
           sudo apt-get update && sudo apt-get install -y clang-format
-          git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format -i --dry-run --Werror
+          # Show version for reproducibility
+          clang-format --version
+          # Run in check mode; do not modify files (-i removed). Use style from repo file explicitly.
+          git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format --style=file --dry-run --Werror
+          # (Optional) If future auto-fix desired, uncomment below to detect diff after formatting copy.
+          # tmpdir=$(mktemp -d)
+          # git ls-files '*.hpp' '*.h' '*.cpp' | while read f; do cp "$f" "$tmpdir/$f"; done
+          # (apply formatting to copies) git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r -I{} sh -c 'clang-format --style=file {} > "$tmpdir/{}"'
+          # diff -ru --label=orig --label=formatted . "$tmpdir" | head -200
 
       - name: Analyze (clang-tidy)
         if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
