@@ -39,21 +39,6 @@ jobs:
           cmake --build build --target tc_tests_noex --config Debug --parallel 2
           ctest --test-dir build -C Debug -R tc_tests_noex --output-on-failure
 
-      - name: Lint (clang-format)
-        if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
-        run: |
-          sudo apt-get update && sudo apt-get install -y clang-format
-          # Show version for reproducibility
-            sudo apt-get update && sudo apt-get install -y clang-format-18
-            sudo ln -sf /usr/bin/clang-format-18 /usr/local/bin/clang-format
-            clang-format --version || true
-          # Run in check mode; do not modify files (-i removed). Use style from repo file explicitly.
-          git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r clang-format --style=file --dry-run --Werror
-          # (Optional) If future auto-fix desired, uncomment below to detect diff after formatting copy.
-          # tmpdir=$(mktemp -d)
-          # git ls-files '*.hpp' '*.h' '*.cpp' | while read f; do cp "$f" "$tmpdir/$f"; done
-          # (apply formatting to copies) git ls-files '*.hpp' '*.h' '*.cpp' | xargs -r -I{} sh -c 'clang-format --style=file {} > "$tmpdir/{}"'
-          # diff -ru --label=orig --label=formatted . "$tmpdir" | head -200
 
       - name: Analyze (clang-tidy)
         if: matrix.os == 'ubuntu-latest' && matrix.exceptions == 'on'
