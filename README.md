@@ -94,3 +94,7 @@ Requirements:
 - `clang-format` available in your PATH.
 
 The hook formats staged `*.{c,cc,cpp,cxx,h,hh,hpp,hxx}` files and re-stages them before commit.
+
+## Changelog
+
+See `CHANGELOG.md` for release history.
