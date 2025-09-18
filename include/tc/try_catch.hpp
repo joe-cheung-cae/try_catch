@@ -392,4 +392,4 @@ inline sink_t get_sink() {
 // ===================== Versioning =====================
 #define TC_TRY_CATCH_VERSION_MAJOR 0
 #define TC_TRY_CATCH_VERSION_MINOR 1
-#define TC_TRY_CATCH_VERSION_PATCH 0
+#define TC_TRY_CATCH_VERSION_PATCH 2

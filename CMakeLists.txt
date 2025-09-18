@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(TryCatchMacros VERSION 0.1.0 LANGUAGES CXX)
+project(TryCatchMacros VERSION 0.1.2 LANGUAGES CXX)
 
 option(TC_FORCE_NO_EXCEPTIONS "Force-build example with exceptions disabled (GCC/Clang)" OFF)
 
